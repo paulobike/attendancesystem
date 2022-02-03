@@ -11,26 +11,25 @@ module.exports = {
         }
         Class.find({course: req.params.id}).populate('attendance')
         .then(classes => {
-            let thisClass = [];
+            let studentsAttendance = [];
             Student.find()
             .then(students => {
-                thisClass = classes.map(classObj => {
-                    let attendance = students.map(student => {
-                        return {
-                            name: student.name,
-                            regNumber: student.regNumber,
-                            status: classObj.attendance.find(e => student._id.equals(e._id)) ? 'present': 'absent'
-                        }
-                    })
-                    return {
-                        count: classObj.classCount,
-                        attendance
+                studentsAttendance = students.map(student => {
+                    let attendance = {
+                        name: student.name,
+                        regNumber: student.regNumber
                     }
-                });
+                    classes.forEach(classObj => {
+                        attendance['class' + classObj.classCount] = 
+                        classObj.attendance.find(e => student._id.equals(e._id)) ? 'present': 'absent'
+                    });
+                    return attendance;
+                }) 
+                
                 res.json({
                     status: 200,
                     message: 'Successful',
-                    data: thisClass
+                    data: studentsAttendance
                 })
             }); 
         })        
