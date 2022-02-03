@@ -12,6 +12,7 @@ module.exports = {
         Class.find({course: req.params.id}).populate('attendance')
         .then(classes => {
             let studentsAttendance = [];
+            let totalClass = classes.length;
             Student.find()
             .then(students => {
                 studentsAttendance = students.map(student => {
@@ -19,10 +20,16 @@ module.exports = {
                         name: student.name,
                         regNumber: student.regNumber
                     }
+                    let attended = 0;
                     classes.forEach(classObj => {
-                        attendance['class' + classObj.classCount] = 
-                        classObj.attendance.find(e => student._id.equals(e._id)) ? 'present': 'absent'
+                        if(classObj.attendance.find(e => student._id.equals(e._id))) {
+                            attendance['class' + classObj.classCount] = 'present'; 
+                            attended++;
+                        } else {
+                            attendance['class' + classObj.classCount] = 'absent';
+                        }                       
                     });
+                    attendance.percentage = (attended / totalClass) * 100;
                     return attendance;
                 }) 
                 
